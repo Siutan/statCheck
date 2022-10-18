@@ -4,14 +4,31 @@
 
 </script>
 
-<div data-tauri-drag-region class="h-6 flex justify-end fixed top-0 bottom-0 left-0 right-0 z-50">
+<div data-tauri-drag-region class="h-8 flex justify-end fixed top-0 bottom-0 left-0 right-0 z-50 bg-gradient-to-b bg-darkBlue-500 border-b-2 border-teal-900">
 
-    <div class="p-1 place-items-end">
-        <input class="bg-gray-800  shadow-2xl h-5 top-5" type="search" />
+    <div>
+        <!-- back button -->
+        <div class="h-5 w-5 rounded-full absolute flex left-8 top-1 bg-transparent border-none outline-none hover:bg-teal-500 items-center" on:click={() => history.back()}>
+            <svg class="h-4 w-4 mx-auto text-white" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+        </div>
     </div>
 
+    <div class="">
+        <!-- back button -->
+        <div class="h-5 w-5 rounded-full absolute flex left-14 top-1 bg-transparent border-none outline-none hover:bg-teal-500 items-center" on:click={() => history.forward()}>
+            <svg class="h-4 w-4 mx-auto text-white" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+        </div>
+    </div>
+
+
     <div
-            class="titlebar-button hover:bg-gray-800"
+            class="titlebar-button m-1 rounded-full hover:bg-teal-600"
             id="titlebar-minimize"
             on:click={() => appWindow.minimize()}
     >
@@ -30,11 +47,11 @@
         </svg>
     </div>
     <div
-            class="titlebar-button hover:bg-gray-800"
+            class="titlebar-button m-1 rounded-full hover:bg-teal-600"
             id="titlebar-maximize"
             on:click={() => appWindow.toggleMaximize()}
     >
-        <!-- maximize svg -->
+        <!-- maximize svg mac style -->
         <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="10"
@@ -47,16 +64,15 @@
                     fill="#fff"
             />
             <rect
-                    x="2"
-                    y="2"
-                    width="6"
-                    height="6"
-                    fill="#000"
+                    x="1"
+                    y="1"
+                    width="8"
+                    height="8"
             />
         </svg>
     </div>
     <div
-            class="titlebar-button hover:bg-gray-800"
+            class="titlebar-button m-1 rounded-full hover:bg-red-900"
             id="titlebar-close"
             on:click={() => appWindow.close()}
     >
@@ -81,8 +97,8 @@
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
     }
 
 </style>

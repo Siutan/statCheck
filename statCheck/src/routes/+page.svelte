@@ -1,64 +1,111 @@
 <script>
-  import SummName from "$lib/SummName.svelte";
-  import ChampionStats from "$lib/ChampionStats.svelte";
-  import MatchCard from "$lib/MatchCard.svelte";
+    import {writable} from 'svelte/store'
+    import {LIVE_MATCH, SUMMONER_BASIC, SUMMONER_OVERVIEW} from "../urls.ts";
 
-  let summonerData = {};
+    // import skeleton loaders
+    import SummonerSkeleton from "$lib/skeletons/SummonerSkeleton.svelte";
+    import MatchCardSkeleton from "$lib/skeletons/MatchCardSkeleton.svelte";
+    import RecentActivitySkeleton from "$lib/skeletons/RecentActivitySkeleton.svelte";
+    import ChampionStatsSkeleton from "$lib/skeletons/ChampionStatsSkeleton.svelte";
 
-  // fetch data from username
-  async function summonerBasic() {
-    let myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+    import SummName from "$lib/SummName.svelte";
+    import ChampionStats from "$lib/ChampionStats.svelte";
+    import MatchCard from "$lib/MatchCard.svelte";
+    import RecentActivity from "$lib/recentGames/RecentActivity.svelte";
+    import SearchBar from "$lib/SearchBar.svelte";
 
-    let raw = JSON.stringify({
-      "summoner": "homos in paris",
-      "region": "oc1"
-    });
+    let summonerData = {};
+    let championData = {};
+    let matchData = {};
+    let recentMatches = [];
+    let errorMessage
+    const summoner = writable("Homos in paris")
+    const region = writable("oc1")
 
-    let requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
-    };
-
-    const res = await fetch("https://corspog.herokuapp.com/https://api.leaguestats.gg/summoner/basic", requestOptions)
-    const data = await res.json()
-    console.log(data)
-
-    if (res.ok) {
-      summonerData = data.account;
-    } else {
-      console.log("error")
-      throw new Error(data.message)
+    // dont think i need this
+    const getError = (error) => {
+        const messageCodes = {
+            404: "Summoner not found",
+            403: "API key is invalid",
+            429: "Too many requests",
+            500: "Internal server error",
+            503: "Service unavailable"
+        }
+        if (messageCodes[error]) {
+            errorMessage = messageCodes[error]
+        } else {
+            errorMessage = "Something went wrong"
+        }
     }
-  }
+
+    const getSummonerOverview = async (accountId, puuid, region) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({accountId, puuid, region})
+        };
+        const response = await fetch(SUMMONER_OVERVIEW, requestOptions);
+        return await response.json();
+    }
+
+    // fetch data from username
+    const summonerBasic = async (name, region) => {
+        let requestOptions = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                "summoner": name,
+                "region": region
+            })
+        };
+        const res = await fetch(SUMMONER_BASIC, requestOptions)
+        const data = await res.json()
+        if (res.ok) {
+            summonerData = data.account;
+            recentMatches = data.recentActivity;
+            await getSummonerOverview(data.account.accountId, data.account.puuid, region)
+                .then(data => {
+                    championData = data.stats.champion;
+                    console.log(championData)
+                    matchData = data.matchesDetails;
+                })
+                .catch(err => console.log(err))
+        } else {
+            console.log(res)
+            getError(res.status)
+        }
+    }
 </script>
 
 <div>
-  {#await summonerBasic()}
-    <p>loading...</p>
-  {:then x}
-    <div class="flex flex-row gap-5">
-      <div>
-        <SummName {...summonerData} />
-        <ChampionStats puuid={summonerData.puuid} />
-      </div>
-      <div class="">
-        <MatchCard puuid={summonerData.puuid} accountId={summonerData.accountId} region="oc1" />
-      </div>
-    </div>
-  {:catch error}
-    <p>{error.message}</p>
-  {/await}
+    <SearchBar bind:value={$summoner} bind:region={$region} />
+    {#await summonerBasic($summoner, $region)}
+        <div class="flex flex-row gap-5">
+            <div>
+                <SummonerSkeleton/>
+                <ChampionStatsSkeleton/>
+                <RecentActivitySkeleton/>
+            </div>
+            <div class="">
+                <MatchCardSkeleton/>
+                <MatchCardSkeleton/>
+                <MatchCardSkeleton/>
+                <MatchCardSkeleton/>
+                <MatchCardSkeleton/>
+            </div>
+        </div>
+    {:then x}
+        <div class="flex flex-row gap-5">
+            <div>
+                <SummName {...summonerData}/>
+                <ChampionStats championData={championData}/>
+                <RecentActivity data={recentMatches}/>
+            </div>
+            <div class="">
+                <MatchCard matchHistory={matchData}/>
+            </div>
+        </div>
+    {:catch e}
+        <div class="text-center justify-center">{errorMessage}</div>
+    {/await}
 </div>
-
-<style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-  }
-
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
-  }
-</style>
