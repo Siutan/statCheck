@@ -1,8 +1,14 @@
-# Svelte-Kit + Vite
+# StatCheck
 
-This template should help get you started developing with Tauri and Svelte-Kit in Vite.
+A simple tool to view your or others match history in League of Legends, sort of like op.gg but with less features.
+Initially made to mess around with Tauri and Svelte, but as im adding more features, might make it into something more useful.
 
-## Recommended IDE Setup
+## How to run
+```bash
+# Install dependencies
+yarn install
+# Run Tauri Dev 
+yarn tauri dev
+```
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
 
